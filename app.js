@@ -156,7 +156,7 @@
       var sec = sections[i];
       var items = Array.isArray(sec.items) ? sec.items : [];
       if (!items.length) continue;
-      count += items.length;
+      if (sec.key !== "coverage") count += items.length; // coverage/method card is not a report
       html += "<section><h2>" + esc(sec.title || "") + "</h2>";
       for (var j = 0; j < items.length; j++) html += renderItem(items[j]);
       html += "</section>";
