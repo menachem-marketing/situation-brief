@@ -4,7 +4,7 @@
   "use strict";
 
   var POLL_MS = 120000; // re-check data.json every 2 minutes
-  var lastGenerated = null, currentData = null, activeFilter = "all";
+  var lastGenerated = null, lastPayload = null, currentData = null, activeFilter = "all";
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -19,13 +19,13 @@
   function fmtTime(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
-    return d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric" });
+    return d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem", day: "numeric", month: "numeric" });
   }
 
   function fmtUpdated(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
-    return "בדיקה " + d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric" });
+    return "בדיקה " + d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jerusalem", day: "numeric", month: "numeric" });
   }
 
   function link(name, url) {
@@ -132,7 +132,7 @@
     groups.forEach(function(g){var sum=g.points.reduce(function(a,p){a.x+=p.x;a.y+=p.y;return a;},{x:0,y:0});var center=map.containerPointToLatLng([sum.x/g.points.length,sum.y/g.points.length]);
       var label=g.hits.length>1 ? g.hits.length+' סימונים סמוכים, פתיחת רשימה' : g.hits[0].item.title+' - מיקום משוער';
       var mk=L.marker(center,{icon:L.divIcon({className:'pin',html:'<span class="'+(g.hits.length>1?'cluster':'')+'">'+(g.hits.length>1?g.hits.length:'')+'</span>',iconSize:[44,44],iconAnchor:[22,22]}),title:label,alt:label});
-      mk.on('click',function(){showGroup(g.hits);});mapLayer.addLayer(mk);g.hits.forEach(function(h){markerById[h.item.id]=mk;});
+      mk.on('click',function(){showGroup(g.hits);});mapLayer.addLayer(mk);if(mk.getElement())mk.getElement().setAttribute('aria-label',label);g.hits.forEach(function(h){markerById[h.item.id]=mk;});
     });
   }
   function updateMap(sections) {
@@ -172,7 +172,8 @@
     fetch("data.json", { cache: "no-store" })
       .then(function (r) { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
       .then(function (data) {
-        if (data && data.generated_at !== lastGenerated) {
+        if (data && JSON.stringify(data) !== lastPayload) {
+          lastPayload = JSON.stringify(data);
           lastGenerated = data ? data.generated_at : null;
           render(data);
         }
