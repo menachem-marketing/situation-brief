@@ -1,5 +1,6 @@
-/* Network-first service worker: the brief must show fresh data on every open. */
-var CACHE = "situation-brief-v3";
+/* Network-first service worker: shell and data must always be fresh when online;
+   cache is only an offline fallback. */
+var CACHE = "situation-brief-v4";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
@@ -18,29 +19,16 @@ self.addEventListener("fetch", function (e) {
   var url = new URL(e.request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (e.request.mode === "navigate" || url.pathname.endsWith("/data.json")) {
-    // Network first, fall back to last cached copy when offline.
-    e.respondWith(
-      fetch(e.request).then(function (resp) {
-        var copy = resp.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        return resp;
-      }).catch(function () {
-        return caches.match(e.request).then(function (cached) {
-          return cached || (e.request.mode === "navigate" ? caches.match("./index.html") : Response.error());
-        });
-      })
-    );
-    return;
-  }
-
-  // Static assets: cache first.
   e.respondWith(
-    caches.match(e.request).then(function (cached) {
-      return cached || fetch(e.request).then(function (resp) {
+    fetch(e.request).then(function (resp) {
+      if (resp.ok) {
         var copy = resp.clone();
         caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
-        return resp;
+      }
+      return resp;
+    }).catch(function () {
+      return caches.match(e.request).then(function (cached) {
+        return cached || (e.request.mode === "navigate" ? caches.match("./index.html") : Response.error());
       });
     })
   );
