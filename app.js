@@ -12,6 +12,10 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
+  function safeUrl(u) {
+    return /^https?:\/\//i.test(String(u == null ? "" : u)) ? String(u) : null;
+  }
+
   function fmtTime(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
@@ -24,17 +28,48 @@
     return "עודכן " + d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric" });
   }
 
+  function link(name, url) {
+    var u = safeUrl(url);
+    if (!name) return "";
+    if (u) return '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(name) + "</a>";
+    return esc(name);
+  }
+
+  function renderSources(it) {
+    var out = [];
+    if (Array.isArray(it.sources)) {
+      for (var i = 0; i < it.sources.length; i++) {
+        var s = it.sources[i], name = null, url = null;
+        if (Array.isArray(s)) { name = s[0]; url = s[1]; }
+        else if (s && typeof s === "object") { name = s.name; url = s.url; }
+        else { name = s; }
+        var h = link(name, url);
+        if (h) out.push(h);
+      }
+    }
+    if (!out.length && it.source_name) {
+      var single = link(it.source_name, it.source_url);
+      if (single) out.push(single);
+    }
+    return out;
+  }
+
   function renderItem(it) {
     var html = '<article><div class="meta">';
-    if (it.time) html += "<time>" + esc(fmtTime(it.time)) + "</time>";
+    // time_label is the source's exact original label (mixed date/time wording);
+    // it is shown verbatim and never reinterpreted. ISO "time" is the fallback.
+    if (it.time_label) html += "<time>" + esc(it.time_label) + "</time>";
+    else if (it.time) html += "<time>" + esc(fmtTime(it.time)) + "</time>";
     if (it.verification) html += '<span class="badge">' + esc(it.verification) + "</span>";
     html += "</div>";
     if (it.title) html += "<h3>" + esc(it.title) + "</h3>";
     if (it.summary) html += "<p>" + esc(it.summary) + "</p>";
-    if (it.source_url && it.source_name) {
-      html += '<div class="src">מקור: <a href="' + esc(it.source_url) + '" target="_blank" rel="noopener noreferrer">' + esc(it.source_name) + "</a></div>";
-    } else if (it.source_name) {
-      html += '<div class="src">מקור: ' + esc(it.source_name) + "</div>";
+    if (it.detail) {
+      html += '<details class="more"><summary>' + esc(it.detail_label || "פירוט נוסף") + "</summary><p>" + esc(it.detail) + "</p></details>";
+    }
+    var srcs = renderSources(it);
+    if (srcs.length) {
+      html += '<div class="src">' + (srcs.length > 1 ? "מקורות: " : "מקור: ") + srcs.join(" · ") + "</div>";
     }
     return html + "</article>";
   }
