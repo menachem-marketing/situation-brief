@@ -109,6 +109,7 @@
   var filterDefs = [["all","הכול"],["jerusalem","ירושלים ועוטף"],["wb","איו״ש"],["crossings","מעברים וצירים"],["national","ארצי"]];
   function matches(it) {
     if(activeFilter === "all") return true;
+    if(Array.isArray(it.filter_regions) && it.filter_regions.indexOf(activeFilter)>=0) return true;
     return activeFilter === "jerusalem" ? /ירושלים/.test(it.region||"") : activeFilter === "wb" ? it.region === "איו״ש" : activeFilter === "crossings" ? it.region === "מחסומים וצירים" : it.region === "ישראל";
   }
   function showGroup(group) {

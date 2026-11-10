@@ -171,7 +171,12 @@
             "longitude": 35.183,
             "accuracy": "approximate",
             "note": "מרכז היישוב בלבד; מיקום המעבר המדויק לא אומת"
-          }
+          },
+          "filter_regions": [
+            "jerusalem",
+            "wb",
+            "crossings"
+          ]
         },
         {
           "id": 135,
@@ -393,7 +398,11 @@
             ]
           ],
           "source_name": "אג׳יאל: הבחנת שערים ובידוק בבוקר",
-          "source_url": "https://t.me/ajyalfm/165725"
+          "source_url": "https://t.me/ajyalfm/165725",
+          "filter_regions": [
+            "wb",
+            "crossings"
+          ]
         }
       ]
     },
