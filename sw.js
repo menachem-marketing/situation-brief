@@ -1,6 +1,7 @@
-/* Network-first service worker: shell and data must always be fresh when online;
-   cache is only an offline fallback. */
-var CACHE = "situation-brief-v4";
+/* Network-first with revalidation: every same-origin GET is revalidated against
+   the network (etag 304s keep it cheap), so GitHub Pages' max-age=600 HTTP cache
+   can never pin a stale shell or stale data. Cache storage is the offline fallback. */
+var CACHE = "situation-brief-v5";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
@@ -20,7 +21,7 @@ self.addEventListener("fetch", function (e) {
   if (url.origin !== self.location.origin) return;
 
   e.respondWith(
-    fetch(e.request).then(function (resp) {
+    fetch(e.request, { cache: "no-cache" }).then(function (resp) {
       if (resp.ok) {
         var copy = resp.clone();
         caches.open(CACHE).then(function (c) { c.put(e.request, copy); });
