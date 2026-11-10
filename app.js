@@ -83,7 +83,7 @@
   /* Optional map: items may carry location or locations[] with
      {label, latitude, longitude, accuracy, note}. All current anchors are
      approximate locality centers; notes are shown verbatim in the popup. */
-  var map = null, mapLayer = null;
+  var map = null, mapLayer = null, didHashScroll = false;
 
   function locatedItems(sections) {
     var out = [];
@@ -168,6 +168,10 @@
       for (var sj = 0; sj < sItems.length; sj++) {
         if (Array.isArray(sItems[sj].sources)) srcTotal += sItems[sj].sources.length;
       }
+    }
+    if (!didHashScroll && location.hash.length > 1) {
+      var hashTarget = document.getElementById(location.hash.slice(1));
+      if (hashTarget) { didHashScroll = true; setTimeout(function () { hashTarget.scrollIntoView(); }, 0); }
     }
     var statsEl = document.getElementById("stats");
     if (statsEl) statsEl.textContent = count ? (count + " דיווחים · " + srcTotal + " מקורות") : "";
