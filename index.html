@@ -99,6 +99,7 @@
   .leaflet-control-zoom a {width:44px!important;height:44px!important;line-height:44px!important;}
   #map {isolation:isolate;z-index:0;} .empty{padding:20px 0;}
   @media(max-width:360px){#map{height:340px;}.head-row{gap:6px;}#updated{font-size:11px;}}
+.admin-entry{min-height:44px;display:inline-flex;align-items:center;padding:6px 10px;color:inherit;border:1px solid #64748b;border-radius:8px;font-size:13px;white-space:nowrap;text-decoration:none;}
 </style>
 </head>
 <body>
@@ -107,7 +108,7 @@
     <h1>תמונת מצב</h1>
     <span id="updated">טוען…</span>
   </div>
-  <div class="head-row"><span id="stats"></span></div>
+  <div class="head-row"><span id="stats"></span><a class="admin-entry" href="https://situation-admin.menachemlasker.workers.dev/" rel="noopener">כניסת מנהל 🔒</a></div>
 </header>
 <div id="overview" class="tools"><section id="changes" aria-live="polite"></section><nav id="filters" aria-label="סינון אזורי"></nav><p id="result-count" aria-live="polite"></p></div>
 <section id="mapsec" hidden>
