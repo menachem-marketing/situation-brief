@@ -408,5 +408,14 @@
         }
       ]
     }
-  ]
+  ],
+  "edition_changes": {
+    "compared_to": "2026-11-10T09:50:00+02:00",
+    "changed_at": "2026-11-10T10:05:00+02:00",
+    "added": [
+      203
+    ],
+    "updated": [],
+    "removed": []
+  }
 }

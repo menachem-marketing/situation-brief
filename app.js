@@ -4,7 +4,7 @@
   "use strict";
 
   var POLL_MS = 120000; // re-check data.json every 2 minutes
-  var lastGenerated = null;
+  var lastGenerated = null, currentData = null, activeFilter = "all";
 
   function esc(s) {
     return String(s == null ? "" : s)
@@ -25,7 +25,7 @@
   function fmtUpdated(iso) {
     var d = new Date(iso);
     if (isNaN(d)) return "";
-    return "עודכן " + d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric" });
+    return "בדיקה " + d.toLocaleString("he-IL", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "numeric" });
   }
 
   function link(name, url) {
@@ -77,6 +77,7 @@
     if (srcs.length) {
       html += '<div class="src">' + (srcs.length > 1 ? "מקורות: " : "מקור: ") + srcs.join(" · ") + "</div>";
     }
+    if (locatedItems([{items:[it]}]).length) html += '<button class="card-action" data-map-id="'+esc(it.id)+'">הצגה במפה</button>';
     return html + "</article>";
   }
 
@@ -102,81 +103,70 @@
     return out;
   }
 
-  function updateMap(sections) {
-    var sec = document.getElementById("mapsec");
-    if (!sec) return;
-    var hits = locatedItems(sections);
-    if (!hits.length) { sec.hidden = true; return; }
-    if (!window.L) { sec.hidden = true; return; }
-    sec.hidden = false;
-    if (!map) {
-      map = L.map("map", { scrollWheelZoom: false });
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      }).addTo(map);
-      map.setView([31.6, 35.05], 8);
-      mapLayer = L.layerGroup().addTo(map);
-    }
-    mapLayer.clearLayers();
-    var bounds = [];
-    for (var i = 0; i < hits.length; i++) {
-      (function (h) {
-        for (var k = 0; k < h.locations.length; k++) {
-          var loc = h.locations[k];
-          var approx = loc.accuracy === "approximate";
-          var mk = L.marker([+loc.latitude, +loc.longitude], {
-            icon: L.divIcon({ className: "pin " + (approx ? "pin-approx" : "pin-exact"), iconSize: [16, 16] }),
-            title: h.item.title || ""
-          });
-          var html = "<b>" + esc(h.item.title || "") + "</b>";
-          if (loc.label) html += '<div class="pop-label">' + esc(loc.label) + "</div>";
-          if (approx) html += '<div class="pop-acc">מיקום משוער</div>';
-          if (loc.note) html += '<div class="pop-note">' + esc(loc.note) + "</div>";
-          if (h.item.id) html += '<a href="#item-' + String(h.item.id).replace(/[^A-Za-z0-9_-]/g, "") + '">לכרטיס הדיווח המלא</a>';
-          mk.bindPopup(html);
-          mapLayer.addLayer(mk);
-          bounds.push([+loc.latitude, +loc.longitude]);
-        }
-      })(hits[i]);
-    }
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 10 });
-    else if (bounds.length === 1) map.setView(bounds[0], 9);
-    setTimeout(function () { map.invalidateSize(); }, 50);
+  function allReports(data) {
+    return data.sections.filter(function(s){return s.key !== "coverage";}).reduce(function(a,s){return a.concat(s.items||[]);},[]);
   }
-
-  function render(data) {
-    var updatedEl = document.getElementById("updated");
-    var content = document.getElementById("content");
-    updatedEl.textContent = data.generated_at ? fmtUpdated(data.generated_at) : "";
-    var sections = Array.isArray(data.sections) ? data.sections : [];
-    var html = "";
-    var count = 0;
-    for (var i = 0; i < sections.length; i++) {
-      var sec = sections[i];
-      var items = Array.isArray(sec.items) ? sec.items : [];
-      if (!items.length) continue;
-      if (sec.key !== "coverage") count += items.length; // coverage/method card is not a report
-      html += "<section><h2>" + esc(sec.title || "") + "</h2>";
-      for (var j = 0; j < items.length; j++) html += renderItem(items[j]);
-      html += "</section>";
-    }
-    content.innerHTML = count ? html : '<div class="empty">אין פריטים עדיין.</div>';
-    var srcTotal = 0;
-    for (var si = 0; si < sections.length; si++) {
-      var sItems = Array.isArray(sections[si].items) ? sections[si].items : [];
-      for (var sj = 0; sj < sItems.length; sj++) {
-        if (Array.isArray(sItems[sj].sources)) srcTotal += sItems[sj].sources.length;
+  var filterDefs = [["all","הכול"],["jerusalem","ירושלים ועוטף"],["wb","איו״ש"],["crossings","מעברים וצירים"],["national","ארצי"]];
+  function matches(it) {
+    if(activeFilter === "all") return true;
+    return activeFilter === "jerusalem" ? /ירושלים/.test(it.region||"") : activeFilter === "wb" ? it.region === "איו״ש" : activeFilter === "crossings" ? it.region === "מחסומים וצירים" : it.region === "ישראל";
+  }
+  function showGroup(group) {
+    var panel=document.getElementById("map-detail"); panel.hidden=false;
+    panel.innerHTML='<h3>'+ (group.length>1 ? group.length+' סימונים סמוכים - בחירת דיווח' : 'פרטי הסימון')+'</h3><p>מרכזי יישובים להתמצאות בלבד. אין כאן נקודת אירוע מדויקת.</p>'+group.map(function(h){return '<article><h3>'+esc(h.item.title)+'</h3><p>'+esc(h.location.label)+' · '+(h.location.accuracy==='approximate'?'מיקום משוער':'מיקום לפי המקור')+'</p><p>'+esc(h.location.note||'')+'</p><p>'+esc(h.item.time_label||'')+' · '+esc(h.item.verification||'')+'</p><div class="map-links"><a href="#item-'+esc(h.item.id)+'">לכרטיס הדיווח המלא</a></div></article>';}).join('');
+    panel.scrollIntoView({block:'nearest'});
+  }
+  var mapHits=[], markerById={};
+  function drawMarkers() {
+    if(!mapLayer) return;
+    mapLayer.clearLayers(); markerById={};
+    var groups=[];
+    mapHits.forEach(function(h){var pt=map.latLngToContainerPoint([h.location.latitude,h.location.longitude]);groups.push({hits:[h],points:[pt]});});
+    // Merge overlapping touch targets, including transitive overlaps. No displaced incident pins.
+    var merged=true;
+    while(merged){merged=false;outer:for(var i=0;i<groups.length;i++)for(var j=i+1;j<groups.length;j++){
+      if(groups[i].points.some(function(p){return groups[j].points.some(function(q){return p.distanceTo(q)<50;});})){
+        groups[i].hits=groups[i].hits.concat(groups[j].hits);groups[i].points=groups[i].points.concat(groups[j].points);groups.splice(j,1);merged=true;break outer;
       }
-    }
-    if (!didHashScroll && location.hash.length > 1) {
-      var hashTarget = document.getElementById(location.hash.slice(1));
-      if (hashTarget) { didHashScroll = true; setTimeout(function () { hashTarget.scrollIntoView(); }, 0); }
-    }
-    var statsEl = document.getElementById("stats");
-    if (statsEl) statsEl.textContent = count ? (count + " דיווחים · " + srcTotal + " מקורות") : "";
-    updateMap(sections);
+    }}
+    groups.forEach(function(g){var sum=g.points.reduce(function(a,p){a.x+=p.x;a.y+=p.y;return a;},{x:0,y:0});var center=map.containerPointToLatLng([sum.x/g.points.length,sum.y/g.points.length]);
+      var label=g.hits.length>1 ? g.hits.length+' סימונים סמוכים, פתיחת רשימה' : g.hits[0].item.title+' - מיקום משוער';
+      var mk=L.marker(center,{icon:L.divIcon({className:'pin',html:'<span class="'+(g.hits.length>1?'cluster':'')+'">'+(g.hits.length>1?g.hits.length:'')+'</span>',iconSize:[44,44],iconAnchor:[22,22]}),title:label,alt:label});
+      mk.on('click',function(){showGroup(g.hits);});mapLayer.addLayer(mk);g.hits.forEach(function(h){markerById[h.item.id]=mk;});
+    });
   }
+  function updateMap(sections) {
+    var sec=document.getElementById('mapsec'),hits=locatedItems(sections);
+    document.getElementById('map-detail').hidden=true;
+    mapHits=[];hits.forEach(function(h){h.locations.forEach(function(l){mapHits.push({item:h.item,location:l});});});
+    if(!mapHits.length||!window.L){sec.hidden=true;return;}sec.hidden=false;
+    if(!map){map=L.map('map',{scrollWheelZoom:false});L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);mapLayer=L.layerGroup().addTo(map);map.on('zoomend',drawMarkers);}
+    map.invalidateSize();
+    var bounds=mapHits.map(function(h){return [h.location.latitude,h.location.longitude];});
+    map.fitBounds(bounds,{padding:[35,35],maxZoom:12,animate:false});drawMarkers();
+  }
+  function render(data) {
+    currentData=data;
+    document.getElementById('updated').textContent=data.generated_at ? fmtUpdated(data.generated_at):'';
+    var reports=allReports(data),visible=reports.filter(matches),located=locatedItems([{items:visible}]).length;
+    document.getElementById('stats').textContent=reports.length+' דיווחים · '+reports.reduce(function(n,it){return n+(it.sources||[]).length;},0)+' קישורי מקור (לא בהכרח עצמאיים)';
+    document.getElementById('filters').innerHTML=filterDefs.map(function(f){return '<button data-filter="'+f[0]+'" aria-pressed="'+(f[0]===activeFilter)+'">'+f[1]+'</button>';}).join('');
+    document.getElementById('result-count').innerHTML='מוצגים '+visible.length+' דיווחים: '+located+' עם מיקום משוער · '+(visible.length-located)+' ללא מיקום במפה. <a href="#content">לרשימה</a>';
+    var changes=data.edition_changes;
+    var ids=changes ? (changes.added||[]).concat(changes.updated||[]) : [];
+    var changed=reports.filter(function(it){return ids.indexOf(it.id)>=0;});
+    document.getElementById('changes').innerHTML='<h2>השינוי האחרון ברשימה</h2>'+(changes ? '<p>עודכן '+esc(fmtTime(changes.changed_at))+' · בהשוואה לבדיקה '+esc(fmtTime(changes.compared_to))+'. '+(changed.length ? 'דיווחים שנוספו או עודכנו:' : 'לא השתנו הדיווחים שנבחרו; זמן הבדיקה עודכן.')+'</p>'+ (changed.length?'<ul>'+changed.map(function(it){return '<li><a href="#item-'+esc(it.id)+'">'+esc(it.title)+'</a></li>';}).join('')+'</ul>':'') : '<p>אין עדיין השוואה למהדורה קודמת.</p>')+'<p>זמן הבדיקה אינו זמן האירוע. התאריכים וההסתייגויות מופיעים בכל כרטיס.</p>';
+    var html='<section><h2>הדיווחים הנבחרים</h2>'+(visible.length?visible.map(renderItem).join(''):'<p class="empty">אין דיווחים בסינון הזה.</p>')+'</section>';
+    data.sections.filter(function(s){return s.key==='coverage';}).forEach(function(s){html+='<section><h2>'+esc(s.title)+'</h2>'+(s.items||[]).map(renderItem).join('')+'</section>';});
+    document.getElementById('content').innerHTML=html;
+    updateMap([{items:visible}]);
+    if(!didHashScroll && location.hash.length>1){var target=document.getElementById(location.hash.slice(1));if(target){didHashScroll=true;target.scrollIntoView();}}
+  }
+  document.addEventListener('click',function(e){
+    var f=e.target.closest('[data-filter]');if(f){activeFilter=f.dataset.filter;render(currentData);return;}
+    var m=e.target.closest('[data-map-id]');if(m&&map){var hits=mapHits.filter(function(h){return String(h.item.id)===m.dataset.mapId;});if(hits.length){showGroup(hits);document.getElementById('mapsec').scrollIntoView();}return;}
+    var a=e.target.closest('a[href^="#item-"]');if(a){var target=document.getElementById(a.getAttribute('href').slice(1));if(!target&&activeFilter!=='all'){activeFilter='all';render(currentData);target=document.getElementById(a.getAttribute('href').slice(1));}if(target){e.preventDefault();history.replaceState(null,'',a.getAttribute('href'));target.scrollIntoView();target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}}
+  });
 
   function load() {
     fetch("data.json", { cache: "no-store" })

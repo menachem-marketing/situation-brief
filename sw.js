@@ -1,7 +1,7 @@
 /* Network-first with revalidation: every same-origin GET is revalidated against
    the network (etag 304s keep it cheap), so GitHub Pages' max-age=600 HTTP cache
    can never pin a stale shell or stale data. Cache storage is the offline fallback. */
-var CACHE = "situation-brief-v9";
+var CACHE = "situation-brief-v10";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();

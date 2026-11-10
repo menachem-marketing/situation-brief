@@ -76,6 +76,29 @@
   .leaflet-control-attribution a { color: #7d8ea3 !important; }
   @media (max-width: 360px) { #map { height: 260px; } }
   footer { max-width: 760px; margin: 24px auto 0; padding: 0 16px 24px; color: #6b7480; font-size: 12px; }
+
+  .tools { max-width:760px; margin:auto; padding:0 16px; }
+  .tools p, .map-note {color:#aab4c2; font-size:13px;}
+  #changes {background:#161b22;border:1px solid #39424e;border-radius:10px;padding:12px;margin:14px 0 10px;}
+  #changes h2 {border:0;margin:0 0 6px;} #changes ul {padding-right:20px;margin:6px 0;}
+  #filters {display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+  button, .action, details.more summary {min-height:44px;}
+  button, .action {font:inherit;font-size:14px;border-radius:8px;border:1px solid #526176;background:#161b22;color:#d3def0;padding:9px 12px;cursor:pointer;}
+  #filters button[aria-pressed=true] {background:#263e61;color:#fff;border-color:#8fb6ff;}
+  :focus-visible {outline:3px solid #8fb6ff;outline-offset:3px;}
+  article, #mapsec, #map-detail, #content {scroll-margin-top:120px;}
+  article:target {border-color:#8fb6ff;} .card-action {display:inline-flex;align-items:center;margin-top:8px;}
+  details.more summary {display:flex;align-items:center;} details.more summary::before{content:'◂';margin-left:8px;} details.more[open] summary::before{content:'▾';}
+  .pin {width:44px!important;height:44px!important;margin-left:-22px!important;margin-top:-22px!important;border:0;background:transparent;display:flex;align-items:center;justify-content:center;}
+  .pin span {display:flex;align-items:center;justify-content:center;width:24px;height:24px;border:2px solid #abcaff;border-radius:50%;background:#172538;color:#fff;font-size:12px;font-weight:700;box-shadow:0 0 0 2px #0e1116;}
+  .pin .cluster {width:30px;height:30px;} .pin .exact {background:#8fb6ff;color:#101722;}
+  #map-detail {background:#161b22;border:1px solid #8fb6ff;border-radius:10px;padding:12px;margin-top:10px;}
+  #map-detail h3{font-size:15px;} #map-detail article {padding:10px;margin-top:8px;} #map-detail p{font-size:13px;}
+  .map-links {display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .map-links a {min-height:44px;display:flex;align-items:center;}
+  .leaflet-control-zoom a {width:44px!important;height:44px!important;line-height:44px!important;}
+  #map {isolation:isolate;z-index:0;} .empty{padding:20px 0;}
+  @media(max-width:360px){#map{height:300px;}.head-row{gap:6px;}#updated{font-size:11px;}}
 </style>
 </head>
 <body>
@@ -86,9 +109,10 @@
   </div>
   <div class="head-row"><span id="stats"></span></div>
 </header>
+<div id="overview" class="tools"><section id="changes" aria-live="polite"></section><nav id="filters" aria-label="סינון אזורי"></nav><p id="result-count" aria-live="polite"></p></div>
 <section id="mapsec" hidden>
   <h2>מפה</h2>
-  <div id="map"></div>
+  <div id="map" aria-label="מיקומים משוערים"></div><div id="map-detail" hidden></div>
   <div class="map-note">הסימונים מראים מרכזי יישובים <b>משוערים</b> להתמצאות בלבד - לא נקודות אירוע מדויקות. לחיצה על סמן מציגה פרטים ואזהרות.</div>
 </section>
 <main id="content">
@@ -96,6 +120,6 @@
 </main>
 <footer>כל המידע ממקורות גלויים בלבד ועלול להיות חלקי.</footer>
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>
