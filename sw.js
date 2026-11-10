@@ -1,5 +1,5 @@
 /* Network-first service worker: the brief must show fresh data on every open. */
-var CACHE = "situation-brief-v2";
+var CACHE = "situation-brief-v3";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();

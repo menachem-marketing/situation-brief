@@ -60,10 +60,12 @@
     // it is shown verbatim and never reinterpreted. ISO "time" is the fallback.
     if (it.time_label) html += "<time>" + esc(it.time_label) + "</time>";
     else if (it.time) html += "<time>" + esc(fmtTime(it.time)) + "</time>";
+    if (it.region) html += '<span class="badge">' + esc(it.region) + "</span>";
     if (it.verification) html += '<span class="badge">' + esc(it.verification) + "</span>";
     html += "</div>";
     if (it.title) html += "<h3>" + esc(it.title) + "</h3>";
-    if (it.summary) html += "<p>" + esc(it.summary) + "</p>";
+    var lead = it.brief || it.summary; // brief is the curated lead; summary is the verbose fallback
+    if (lead) html += "<p>" + esc(lead) + "</p>";
     if (it.detail) {
       html += '<details class="more"><summary>' + esc(it.detail_label || "פירוט נוסף") + "</summary><p>" + esc(it.detail) + "</p></details>";
     }
