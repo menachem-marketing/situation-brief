@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T10:05:00+02:00",
+  "generated_at": "2026-11-10T11:08:00+02:00",
   "sections": [
     {
       "key": "selected",
@@ -165,18 +165,18 @@
           ],
           "source_name": "ערוץ 7",
           "source_url": "https://www.inn.co.il/news/710300",
+          "filter_regions": [
+            "jerusalem",
+            "wb",
+            "crossings"
+          ],
           "location": {
             "label": "אל ג׳יב",
             "latitude": 31.851,
             "longitude": 35.183,
             "accuracy": "approximate",
             "note": "מרכז היישוב בלבד; מיקום המעבר המדויק לא אומת"
-          },
-          "filter_regions": [
-            "jerusalem",
-            "wb",
-            "crossings"
-          ]
+          }
         },
         {
           "id": 135,
