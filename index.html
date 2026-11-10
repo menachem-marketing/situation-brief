@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>תמונת מצב</title>
 <meta name="description" content="סקירה שוטפת ממקורות גלויים">
-<link rel="manifest" href="manifest.webmanifest?v=5">
+<link rel="manifest" href="manifest.webmanifest?v=6">
 <meta name="theme-color" content="#0e1116">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="vendor/leaflet.css">
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -52,6 +53,27 @@
   details.more { margin-top: 6px; overflow-wrap: anywhere; min-width: 0; }
   details.more summary { cursor: pointer; color: #8fb6ff; font-size: 13px; }
   details.more p { margin-top: 4px; overflow-wrap: anywhere; }
+  #stats { font-size: 12px; color: #6b7480; }
+  #mapsec { max-width: 760px; margin: 14px auto 0; padding: 0 16px; }
+  #mapsec[hidden] { display: none; }
+  #map { height: 340px; border-radius: 10px; border: 1px solid #232a33; background: #0b0e13; margin-top: 2px; }
+  .map-note { font-size: 11.5px; color: #6b7480; margin-top: 6px; line-height: 1.5; }
+  .map-note b { color: #9aa4b0; }
+  .pin { width: 16px !important; height: 16px !important; margin-left: -8px !important; margin-top: -8px !important; border-radius: 50%; box-sizing: border-box; }
+  .pin-approx { background: rgba(143,182,255,.25); border: 2px solid #8fb6ff; }
+  .pin-exact { background: #8fb6ff; border: 2px solid #e6e9ee; }
+  .leaflet-popup-content-wrapper { direction: rtl; text-align: right; background: #161b22; color: #e6e9ee; border: 1px solid #232a33; border-radius: 8px; }
+  .leaflet-popup-tip { background: #161b22; }
+  .leaflet-popup-content { font: 400 13.5px/1.55 system-ui, "Segoe UI", Arial, sans-serif; margin: 10px 12px; }
+  .leaflet-popup-content .pop-label { color: #9aa4b0; font-size: 12.5px; margin-top: 2px; }
+  .leaflet-popup-content .pop-acc { color: #8fb6ff; font-size: 12px; font-weight: 600; margin-top: 3px; }
+  .leaflet-popup-content .pop-note { color: #9aa4b0; font-size: 12px; margin-top: 3px; }
+  .leaflet-popup-content a { display: inline-block; margin-top: 5px; font-weight: 600; }
+  .leaflet-container a.leaflet-popup-close-button { color: #9aa4b0; }
+  .leaflet-bar a { background: #161b22; color: #e6e9ee; border-bottom: 1px solid #232a33; }
+  .leaflet-control-attribution { background: rgba(11,14,19,.75) !important; color: #555f6b !important; font-size: 9px !important; }
+  .leaflet-control-attribution a { color: #7d8ea3 !important; }
+  @media (max-width: 360px) { #map { height: 260px; } }
   footer { max-width: 760px; margin: 24px auto 0; padding: 0 16px 24px; color: #6b7480; font-size: 12px; }
 </style>
 </head>
@@ -61,11 +83,18 @@
     <h1>תמונת מצב</h1>
     <span id="updated">טוען…</span>
   </div>
+  <div class="head-row"><span id="stats"></span></div>
 </header>
+<section id="mapsec" hidden>
+  <h2>מפה</h2>
+  <div id="map"></div>
+  <div class="map-note">הסימונים מראים מרכזי יישובים <b>משוערים</b> להתמצאות בלבד - לא נקודות אירוע מדויקות. לחיצה על סמן מציגה פרטים ואזהרות.</div>
+</section>
 <main id="content">
   <div class="empty">טוען נתונים…</div>
 </main>
 <footer>כל המידע ממקורות גלויים בלבד ועלול להיות חלקי.</footer>
-<script src="app.js?v=5"></script>
+<script src="vendor/leaflet.js"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

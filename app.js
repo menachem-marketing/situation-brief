@@ -54,8 +54,12 @@
     return out;
   }
 
+  function cardId(id) {
+    return id ? ' id="item-' + String(id).replace(/[^A-Za-z0-9_-]/g, "") + '"' : "";
+  }
+
   function renderItem(it) {
-    var html = '<article><div class="meta">';
+    var html = "<article" + cardId(it.id) + '><div class="meta">';
     // time_label is the source's exact original label (mixed date/time wording);
     // it is shown verbatim and never reinterpreted. ISO "time" is the fallback.
     if (it.time_label) html += "<time>" + esc(it.time_label) + "</time>";
@@ -76,6 +80,71 @@
     return html + "</article>";
   }
 
+  /* Optional map: items may carry location or locations[] with
+     {label, latitude, longitude, accuracy, note}. All current anchors are
+     approximate locality centers; notes are shown verbatim in the popup. */
+  var map = null, mapLayer = null;
+
+  function locatedItems(sections) {
+    var out = [];
+    for (var i = 0; i < sections.length; i++) {
+      var items = Array.isArray(sections[i].items) ? sections[i].items : [];
+      for (var j = 0; j < items.length; j++) {
+        var it = items[j];
+        var locs = Array.isArray(it.locations) ? it.locations : (it.location ? [it.location] : []);
+        locs = locs.filter(function (l) {
+          return l && isFinite(+l.latitude) && isFinite(+l.longitude) &&
+                 Math.abs(+l.latitude) <= 90 && Math.abs(+l.longitude) <= 180;
+        });
+        if (locs.length) out.push({ item: it, locations: locs });
+      }
+    }
+    return out;
+  }
+
+  function updateMap(sections) {
+    var sec = document.getElementById("mapsec");
+    if (!sec) return;
+    var hits = locatedItems(sections);
+    if (!hits.length) { sec.hidden = true; return; }
+    if (!window.L) { sec.hidden = true; return; }
+    sec.hidden = false;
+    if (!map) {
+      map = L.map("map", { scrollWheelZoom: false });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+      }).addTo(map);
+      map.setView([31.6, 35.05], 8);
+      mapLayer = L.layerGroup().addTo(map);
+    }
+    mapLayer.clearLayers();
+    var bounds = [];
+    for (var i = 0; i < hits.length; i++) {
+      (function (h) {
+        for (var k = 0; k < h.locations.length; k++) {
+          var loc = h.locations[k];
+          var approx = loc.accuracy === "approximate";
+          var mk = L.marker([+loc.latitude, +loc.longitude], {
+            icon: L.divIcon({ className: "pin " + (approx ? "pin-approx" : "pin-exact"), iconSize: [16, 16] }),
+            title: h.item.title || ""
+          });
+          var html = "<b>" + esc(h.item.title || "") + "</b>";
+          if (loc.label) html += '<div class="pop-label">' + esc(loc.label) + "</div>";
+          if (approx) html += '<div class="pop-acc">מיקום משוער</div>';
+          if (loc.note) html += '<div class="pop-note">' + esc(loc.note) + "</div>";
+          if (h.item.id) html += '<a href="#item-' + String(h.item.id).replace(/[^A-Za-z0-9_-]/g, "") + '">לכרטיס הדיווח המלא</a>';
+          mk.bindPopup(html);
+          mapLayer.addLayer(mk);
+          bounds.push([+loc.latitude, +loc.longitude]);
+        }
+      })(hits[i]);
+    }
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 10 });
+    else if (bounds.length === 1) map.setView(bounds[0], 9);
+    setTimeout(function () { map.invalidateSize(); }, 50);
+  }
+
   function render(data) {
     var updatedEl = document.getElementById("updated");
     var content = document.getElementById("content");
@@ -93,6 +162,16 @@
       html += "</section>";
     }
     content.innerHTML = count ? html : '<div class="empty">אין פריטים עדיין.</div>';
+    var srcTotal = 0;
+    for (var si = 0; si < sections.length; si++) {
+      var sItems = Array.isArray(sections[si].items) ? sections[si].items : [];
+      for (var sj = 0; sj < sItems.length; sj++) {
+        if (Array.isArray(sItems[sj].sources)) srcTotal += sItems[sj].sources.length;
+      }
+    }
+    var statsEl = document.getElementById("stats");
+    if (statsEl) statsEl.textContent = count ? (count + " דיווחים · " + srcTotal + " מקורות") : "";
+    updateMap(sections);
   }
 
   function load() {
