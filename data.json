@@ -51,7 +51,14 @@
             ]
           ],
           "source_name": "קדס נט: ארבעה עצורים לפי המקור",
-          "source_url": "https://t.me/qudsn/750070"
+          "source_url": "https://t.me/qudsn/750070",
+          "location": {
+            "label": "אל-מוע׳ייר, צפון-מזרח רמאללה",
+            "latitude": 32.028,
+            "longitude": 35.374,
+            "accuracy": "approximate",
+            "note": "מרכז היישוב בלבד; לא מקום מעצר או פריסת כוחות"
+          }
         },
         {
           "id": 85,
@@ -73,7 +80,14 @@
             ]
           ],
           "source_name": "כל רגע: שני אירועים",
-          "source_url": "https://www.kore.co.il/viewArticle/224954"
+          "source_url": "https://www.kore.co.il/viewArticle/224954",
+          "location": {
+            "label": "א-טור, ירושלים",
+            "latitude": 31.78,
+            "longitude": 35.247,
+            "accuracy": "approximate",
+            "note": "מרכז השכונה בלבד; לא נקודת הירי"
+          }
         },
         {
           "id": 172,
@@ -91,7 +105,14 @@
             ]
           ],
           "source_name": "כל רגע: הבחנה בין האירועים",
-          "source_url": "https://www.kore.co.il/viewArticle/224954"
+          "source_url": "https://www.kore.co.il/viewArticle/224954",
+          "location": {
+            "label": "עיסאוויה, ירושלים",
+            "latitude": 31.797,
+            "longitude": 35.246,
+            "accuracy": "approximate",
+            "note": "כיוון נסיעת הרכב לפי המקור; מרכז שכונה, לא נקודת הירי"
+          }
         },
         {
           "id": 48,
@@ -117,7 +138,14 @@
             ]
           ],
           "source_name": "ערוץ 7",
-          "source_url": "https://www.inn.co.il/news/710300"
+          "source_url": "https://www.inn.co.il/news/710300",
+          "location": {
+            "label": "אל ג׳יב",
+            "latitude": 31.851,
+            "longitude": 35.183,
+            "accuracy": "approximate",
+            "note": "מרכז היישוב בלבד; מיקום המעבר המדויק לא אומת"
+          }
         },
         {
           "id": 135,
@@ -139,7 +167,14 @@
             ]
           ],
           "source_name": "דובר צה״ל",
-          "source_url": "https://t.me/idf_telegram/25565"
+          "source_url": "https://t.me/idf_telegram/25565",
+          "location": {
+            "label": "עראבה, מחוז ג׳נין",
+            "latitude": 32.405,
+            "longitude": 35.204,
+            "accuracy": "approximate",
+            "note": "מרכז היישוב בלבד; לא בתי החשודים"
+          }
         },
         {
           "id": 174,
@@ -227,7 +262,14 @@
             ]
           ],
           "source_name": "וואלה: דיווח פלסטיני ותגובת צה״ל",
-          "source_url": "https://www.walla.co.il/news/military/383960766"
+          "source_url": "https://www.walla.co.il/news/military/383960766",
+          "location": {
+            "label": "בורקה, צפון-מערב שכם",
+            "latitude": 32.301,
+            "longitude": 35.193,
+            "accuracy": "approximate",
+            "note": "מרכז הכפר בלבד; אין התאמה ודאית בין כל דיווחי הירי והנפגעים"
+          }
         },
         {
           "id": 136,
@@ -267,7 +309,14 @@
             ]
           ],
           "source_name": "קדס נט: דיווח ראשון",
-          "source_url": "https://t.me/qudsn/749963"
+          "source_url": "https://t.me/qudsn/749963",
+          "location": {
+            "label": "ביתא, מדרום לשכם",
+            "latitude": 32.141,
+            "longitude": 35.286,
+            "accuracy": "approximate",
+            "note": "מרכז היישוב בלבד; לא אזור התעשייה או מקום התקיפה"
+          }
         },
         {
           "id": 143,
@@ -285,7 +334,14 @@
             ]
           ],
           "source_name": "חדשות55 שומרון",
-          "source_url": "https://t.me/newshomron55/15303"
+          "source_url": "https://t.me/newshomron55/15303",
+          "location": {
+            "label": "סמוך לעפרה / כביש60",
+            "latitude": 31.955,
+            "longitude": 35.26,
+            "accuracy": "approximate",
+            "note": "מרכז עפרה להקשר אזורי בלבד; לא נקודה בכביש או חסימה"
+          }
         },
         {
           "id": 146,
