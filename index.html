@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>תמונת מצב</title>
 <meta name="description" content="סקירה שוטפת ממקורות גלויים">
-<link rel="manifest" href="manifest.webmanifest?v=6">
+<link rel="manifest" href="manifest.webmanifest?v=7">
 <meta name="theme-color" content="#0e1116">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,6 +71,7 @@
   .leaflet-popup-content a { display: inline-block; margin-top: 5px; font-weight: 600; }
   .leaflet-container a.leaflet-popup-close-button { color: #9aa4b0; }
   .leaflet-bar a { background: #161b22; color: #e6e9ee; border-bottom: 1px solid #232a33; }
+  .leaflet-tile-pane { filter: brightness(.6) invert(1) contrast(3) hue-rotate(200deg) saturate(.3) brightness(.7); }
   .leaflet-control-attribution { background: rgba(11,14,19,.75) !important; color: #555f6b !important; font-size: 9px !important; }
   .leaflet-control-attribution a { color: #7d8ea3 !important; }
   @media (max-width: 360px) { #map { height: 260px; } }
@@ -95,6 +96,6 @@
 </main>
 <footer>כל המידע ממקורות גלויים בלבד ועלול להיות חלקי.</footer>
 <script src="vendor/leaflet.js"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
